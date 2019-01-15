@@ -20,3 +20,15 @@ For temp sensor:
 Something similair using I2C and Pi but diff temp sensor
 https://www.instructables.com/id/Reading-I2C-Inputs-in-Raspberry-Pi-using-C/
 used Librarys: stdio, stdlib, string, stdint
+
+helpful I2C functions:
+https://raspberry-projects.com/pi/programming-in-python/i2c-programming-in-python/using-the-i2c-interface-2
+
+helpful I2C example:
+https://raspberry-projects.com/pi/programming-in-python/i2c-programming-in-python/using-the-i2c-interface-2
+
+I2C installation for Pi- step by step guide:
+http://skpang.co.uk/blog/archives/575
+
+Pi over I2C in C
+http://skpang.co.uk/blog/archives/575
