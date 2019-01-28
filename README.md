@@ -32,3 +32,14 @@ http://skpang.co.uk/blog/archives/575
 
 Pi over I2C in C
 http://skpang.co.uk/blog/archives/575
+
+WiringPi:http://wiringpi.com/
+
+  - about: https://projects.drogon.net/raspberry-pi/wiringpi/
+  - functions: https://projects.drogon.net/raspberry-pi/wiringpi/functions/
+  - pins: https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+      -Pin 3 - I2C.1 SDA
+      -Pin 5: I2C.1 SCL
+      -Pin 27: I2C.0 ID SDA
+      Pin 28: I2C.0 ID SCL
+  - Using I2C with wiringPi: https://projects.drogon.net/raspberry-pi/wiringpi/i2c-library/ and https://learn.sparkfun.com/tutorials/raspberry-pi-spi-and-i2c-tutorial/all
