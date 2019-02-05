@@ -1,5 +1,7 @@
 // via https://github.com/adafruit/Adafruit_Python_LSM303/blob/master/Adafruit_LSM303/LSM303.py
 
+#ifndef LSM303_H
+
 #define LSM303_ADDRESS_ACCEL (0x32 >> 1)  // 0011001x
 #define LSM303_ADDRESS_MAG   (0x3C >> 1)  // 0011110x
                                                 // Default    Type
@@ -29,3 +31,21 @@
 #define LSM303_MAGGAIN_4_7 0xA0 // +/- 4.7
 #define LSM303_MAGGAIN_5_6 0xC0 // +/- 5.6
 #define LSM303_MAGGAIN_8_1 0xE0 // +/- 8.1
+
+struct lsm303_accel_data{
+    float x;
+    float y;
+    float z;
+};
+
+struct lsm303_mag_data{
+    float x;
+    float y;
+    float z;
+};
+
+void setup();
+void read();
+void set_mag_gain();
+
+#endif
