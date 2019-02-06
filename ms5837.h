@@ -9,6 +9,8 @@ temp sensor driver header file
 #include <stdbool.h>
 #include <math.h>
 
+//constants
+
 //kg/m^3 convenience
 DENSITY_FreSHWATER = 997
 DENSITY_SALTWATER = 1029
@@ -29,13 +31,42 @@ UNITS_Farenheit = 2
 UNITS_Kelvin = 3
 
 //I2C addresses/registers
-_MS5837_ADDR            = 0x76
-_MS5837_RESET           = 0x1E
-_MS5837_ADC_READ        = 0x00
-_MS5837_PROM_READ       = 0xA0
-_MS3857_CONVERT_D1_256  = 0x40
-_MS3857_CONVERT_D2_265  = 0x50
+#define MS5837_ADDR           				= 0x76
+#define MS5837_RESET           				= 0x1E
+#define MS5837_ADC_READ        				= 0x00
+#define MS5837_PROM_READ      			 	= 0xA0
+#define MS3857_START_PRESSURE_ADC_CONVERSION  		= 0x40
+#define MS3857_START_TEMPERATIRE_ADC_CONVERSION 	= 0x50
 
+#define MS5837_CONVERSION_OSR_MASK									0x0F
+
+#define MS5837_CONVERSION_TIME_OSR_256								1000
+#define MS5837_CONVERSION_TIME_OSR_512								2000
+#define MS5837_CONVERSION_TIME_OSR_1024								3000
+#define MS5837_CONVERSION_TIME_OSR_2048								5000
+#define MS5837_CONVERSION_TIME_OSR_4096								9000
+#define MS5837_CONVERSION_TIME_OSR_8192								17000
+	
+// MS5837 commands
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_0							0xA0
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_1							0xA2
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_2							0xA4
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_3							0xA6
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_4							0xA8
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_5							0xAA
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_6							0xAC
+#define MS5837_PROM_ADDRESS_READ_ADDRESS_7							0xAE
+
+// Coefficients indexes for temperature and pressure computation
+#define MS5837_CRC_INDEX											0
+#define MS5837_PRESSURE_SENSITIVITY_INDEX							1 
+#define MS5837_PRESSURE_OFFSET_INDEX								2
+#define MS5837_TEMP_COEFF_OF_PRESSURE_SENSITIVITY_INDEX						3
+#define MS5837_TEMP_COEFF_OF_PRESSURE_OFFSET_INDEX						4
+#define MS5837_REFERENCE_TEMPERATURE_INDEX							5
+#define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX							6
+#define MS5837_COEFFICIENT_NUMBERS									7
+	
 enum ms5837_resolution_osr {
 	ms5837_resolution_osr_256 = 0,
 	ms5837_resolution_osr_512,
