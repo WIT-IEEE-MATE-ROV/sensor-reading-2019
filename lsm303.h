@@ -44,8 +44,4 @@ struct lsm303_mag_data{
     float z;
 };
 
-void setup();
-void read();
-void set_mag_gain();
-
 #endif
