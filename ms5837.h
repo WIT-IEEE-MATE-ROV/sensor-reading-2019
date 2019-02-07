@@ -31,14 +31,14 @@ temp sensor driver header file
 #define UNITS_Kelvin     3
 
 //I2C addresses/registers
-#define MS5837_ADDR           						0x76
-#define MS5837_RESET           						0x1E
-#define MS5837_ADC_READ        						0x00
-#define MS5837_PROM_READ      			 			0xA0
+#define MS5837_ADDR           				0x76
+#define MS5837_RESET           				0x1E
+#define MS5837_ADC_READ        				0x00
+#define MS5837_PROM_READ      			 	0xA0
 #define MS3857_START_PRESSURE_ADC_CONVERSION  		0x40
-#define MS3857_START_TEMPERATIRE_ADC_CONVERSION 	0x50
+#define MS3857_START_TEMPERATURE_ADC_CONVERSION 	0x50
 
-#define MS5837_CONVERSION_OSR_MASK					0x0F
+#define MS5837_CONVERSION_OSR_MASK				0x0F
 
 #define MS5837_CONVERSION_TIME_OSR_256				1000
 #define MS5837_CONVERSION_TIME_OSR_512				2000
@@ -58,14 +58,14 @@ temp sensor driver header file
 #define MS5837_PROM_ADDRESS_READ_ADDRESS_7			0xAE
 
 // Coefficients indexes for temperature and pressure computation
-#define MS5837_CRC_INDEX									0
+#define MS5837_CRC_INDEX							0
 #define MS5837_PRESSURE_SENSITIVITY_INDEX					1 
 #define MS5837_PRESSURE_OFFSET_INDEX						2
-#define MS5837_TEMP_COEFF_OF_PRESSURE_SENSITIVITY_INDEX		3
-#define MS5837_TEMP_COEFF_OF_PRESSURE_OFFSET_INDEX			4
+#define MS5837_TEMP_COEFF_OF_PRESSURE_SENSITIVITY_INDEX				3
+#define MS5837_TEMP_COEFF_OF_PRESSURE_OFFSET_INDEX				4
 #define MS5837_REFERENCE_TEMPERATURE_INDEX					5
-#define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX				6
-#define MS5837_COEFFICIENT_NUMBERS							7
+#define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX					6
+#define MS5837_COEFFICIENT_NUMBERS						7
 	
 enum ms5837_resolution_osr {
 	ms5837_resolution_osr_256 = 0,
@@ -87,23 +87,9 @@ struct ms5837_data {
 	float fluidDensity;
 	float pressure;
 	float temp;
+	n_prom[16]
+	C[7]; // calibration values
 }
-	
-// Functions
-
-/**
- * \brief Configures the SERCOM I2C master to be used with the ms5837 device.
- */
-void ms5837_init(void);
-
-/**
- * \brief Check whether MS5837 device is connected
- *
- * \return bool : status of MS5837
- *       - true : Device is present
- *       - false : Device is not acknowledging I2C address
-  */
-bool ms5837_is_connected(void);
 
 /**
  * \brief Reset the MS5837 device
