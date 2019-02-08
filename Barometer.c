@@ -2,6 +2,8 @@
 //https://github.com/bluerobotics/ms5837-python/blob/master/ms5837.py
 
 #include <stdio.h>
+#include <unistd.h>
+#include <math.h>
 #include <wiringPiI2C.h>
 #include "ms5837.h"
 
@@ -64,10 +66,7 @@ bool ms5837_coeff_read = false;
 /**
  * \brief Configures the SERCOM I2C master to be used with the MS5837 device.
  */
-void ms5837_init(struct ms5837_data *data)
-{
-	ms5837_resolution_osr = ms5837_resolution_osr_8192;
-	
+void ms5837_init(struct ms5837_data *data){
     /* Initialize and enable device with config. */
 	wiringPiI2CSetup(MS5837_ADDR);
 	
@@ -77,6 +76,11 @@ void ms5837_init(struct ms5837_data *data)
 		c = ((c & 0xFF) << 8) | (c >> 8)
 		data.C[i] = c;
 	}
+	
+	//Check crc
+	crc = (data.C[0] & 0xF000) >> 12;
+	if crc != data.crc_check(data)
+		printf("PROM read error, CRC failed.");
 }
 
   
@@ -107,10 +111,12 @@ bool ms5837_is_connected(void)
 void ms5837_read(struct ms5837_data *data, oversampling){
 	//read temp
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_TEMPERATIRE_ADC_CONVERSION + 2*oversampling);
+	sleep(0.000025*pow(2,8+oversampling));
 	d = wiringPiI2CRead(MS5837_ADDR);
 	data.d1 = d[0] << 16 | d[1] << 8 | d[2];
 	//read pressure
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_PRESSURE_ADC_CONVERSION + 2*oversampling);
+	sleep(0.000025*pow(2,8+oversampling));
 	d = wiringPiI2CRead(MS5837_ADDR);
 	data.d2 = d[0] << 16 | d[1] << 8 | d[2];
 	calculate(data);
@@ -177,8 +183,8 @@ float altitude(struct ms5837_data *data){
 // need to research, I have no idea what this is
 // copied form TEConnectivity code
 void crc_check(struct ms5837_data *data){
-	uint8_t cnt, n_bit;
-	uint16_t n_rem, crc_read;
+	unsigned char cnt, n_bit;
+	unsigned short n_rem, crc_read;
 	n_rem = 0x00;
 	crc_read = data.n_prom[0];
 	data.n_prom[MS5837_COEFFICIENT_NUMBERS] = 0;
