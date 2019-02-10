@@ -3,53 +3,8 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <math.h>
 #include <wiringPiI2C.h>
 #include "ms5837.h"
-
-/**
-  * The header "i2c.h" has to be implemented for your own platform to 
-  * conform the following protocol :
-  *
-  * enum i2c_transfer_direction {
-  * 	I2C_TRANSFER_WRITE = 0,
-  * 	I2C_TRANSFER_READ  = 1,
-  * };
-  * 
-  * enum status_code {
-  * 	STATUS_OK           = 0x00,
-  * 	STATUS_ERR_OVERFLOW	= 0x01,
-  *		STATUS_ERR_TIMEOUT  = 0x02,
-  * };
-  * 
-  * struct i2c_master_packet {
-  * 	// Address to slave device
-  * 	uint16_t address;
-  * 	// Length of data array
-  * 	uint16_t data_length;
-  * 	// Data array containing all data to be transferred
-  * 	uint8_t *data;
-  * };
-  * 
-  * void i2c_master_init(void);
-  * enum status_code i2c_master_read_packet_wait(struct i2c_master_packet *const packet);
-  * enum status_code i2c_master_write_packet_wait(struct i2c_master_packet *const packet);
-  * enum status_code i2c_master_write_packet_wait_no_stop(struct i2c_master_packet *const packet);
-  */
-
-#include "i2c.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  
-
-// Static functions
-static enum ms5837_status ms5837_write_command(uint8_t);
-static enum ms5837_status ms5837_read_eeprom_coeff(uint8_t, uint16_t*);
-static enum ms5837_status ms5837_read_eeprom(void);
-static enum ms5837_status ms5837_conversion_and_read_adc( uint8_t, uint32_t *);
-static bool ms5837_crc_check (uint16_t *n_prom, uint8_t crc);
 
 enum ms5837_resolution_osr ms5837_resolution_osr;
 static uint16_t eeprom_coeff[MS5837_COEFFICIENT_NUMBERS+1];
@@ -60,15 +15,13 @@ static uint32_t conversion_time[6] = {	MS5837_CONVERSION_TIME_OSR_256,
 					MS5837_CONVERSION_TIME_OSR_4096,
 					MS5837_CONVERSION_TIME_OSR_8192};
 
-// Default value to ensure coefficients are read before converting temperature  
-bool ms5837_coeff_read = false;
-
 /**
  * \brief Configures the SERCOM I2C master to be used with the MS5837 device.
  */
 void ms5837_init(struct ms5837_data *data){
     /* Initialize and enable device with config. */
 	wiringPiI2CSetup(MS5837_ADDR);
+	ms5837_reset();
 	
 	// Read calibration values and CRC
 	for (int i=0;i<8;i++){
@@ -83,31 +36,22 @@ void ms5837_init(struct ms5837_data *data){
 		printf("PROM read error, CRC failed.");
 }
 
-  
 /**
- * \brief Check whether MS5837 device is connected
+ * \brief Reset the MS5837 device
  *
- * \return bool : status of MS5837
- *       - true : Device is present
- *       - false : Device is not acknowledging I2C address
-  */
-bool ms5837_is_connected(void)
+ * \return ms5837_status
+ */
+enum ms5837_status  ms5837_reset(void)
 {
-	enum status_code i2c_status;
-	
-	struct i2c_master_packet transfer = {
-		.address     = MS5837_ADDR,
-		.data_length = 0,
-		.data        = NULL,
-	};
-	/* Do the transfer */
-	i2c_status = i2c_master_write_packet_wait(&transfer);
-	if( i2c_status != STATUS_OK)
-		return false;
-	
-	return true;
+	return wiringPiI2CWrite(MS5837_RESET_COMMAND);
 }
-	
+
+/**
+ * \brief Set  ADC resolution.
+ *
+ * \param[in] ms5837_resolution_osr : Resolution requested
+ *
+ */
 void ms5837_read(struct ms5837_data *data, oversampling){
 	//read temp
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_TEMPERATIRE_ADC_CONVERSION + 2*oversampling);
@@ -122,6 +66,8 @@ void ms5837_read(struct ms5837_data *data, oversampling){
 	calculate(data);
 	printf('Temperature: %0.2f C\n', temperature(data, UNITS_Celsius));
 	printf('Pressure: %0.2f psi\n', pressure(data, UNITS_psi));
+	printf('Depth: %0.2f', depth(data));
+	printf('Altitude: %0.2f', altitude(data));
 }
 	
 // via datasheet
