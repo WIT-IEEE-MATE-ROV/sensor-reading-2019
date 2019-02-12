@@ -87,9 +87,9 @@ struct ms5837_data {
 	float fluidDensity;
 	float pressure;
 	float temp;
-	n_prom[16]
-	C[7]; // calibration values
-}
+  unsigned short d1, d2;
+	unsigned short n_prom[16], C[7]; // calibration values
+};
 
 #endif /* MS5837_H_INCLUDED */
   
