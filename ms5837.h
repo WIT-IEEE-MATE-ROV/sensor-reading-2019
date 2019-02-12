@@ -30,6 +30,14 @@ temp sensor driver header file
 #define UNITS_Farenheit  2
 #define UNITS_Kelvin     3
 
+// Oversampling options
+#define OSR_256  0
+#define OSR_512  1
+#define OSR_1024 2
+#define OSR_2048 3
+#define OSR_4096 4
+#define OSR_8192 5
+
 //I2C addresses/registers
 #define MS5837_ADDR           				0x76
 #define MS5837_RESET           				0x1E
@@ -66,22 +74,6 @@ temp sensor driver header file
 #define MS5837_REFERENCE_TEMPERATURE_INDEX					5
 #define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX					6
 #define MS5837_COEFFICIENT_NUMBERS						7
-	
-enum ms5837_resolution_osr {
-	ms5837_resolution_osr_256 = 0,
-	ms5837_resolution_osr_512,
-	ms5837_resolution_osr_1024,
-	ms5837_resolution_osr_2048,
-	ms5837_resolution_osr_4096,
-	ms5837_resolution_osr_8192
-};
-
-enum ms5837_status {
-	ms5837_status_ok,
-	ms5837_status_no_i2c_acknowledge,
-	ms5837_status_i2c_transfer_error,
-	ms5837_status_crc_error
-};
 
 struct ms5837_data {
 	float fluidDensity;
