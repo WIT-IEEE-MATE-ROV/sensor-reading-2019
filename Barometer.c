@@ -3,21 +3,11 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <wiringPiI2C.h>
-#include <ms5837.h>
-
-enum ms5837_resolution_osr ms5837_resolution_osr;
-static uint16_t eeprom_coeff[MS5837_COEFFICIENT_NUMBERS+1];
-static uint32_t conversion_time[6] = {	MS5837_CONVERSION_TIME_OSR_256,
-					MS5837_CONVERSION_TIME_OSR_512,
-					MS5837_CONVERSION_TIME_OSR_1024,
-					MS5837_CONVERSION_TIME_OSR_2048,
-					MS5837_CONVERSION_TIME_OSR_4096,
-					MS5837_CONVERSION_TIME_OSR_8192};
-
+#include "./WiringPi/wiringPi/wiringPiI2C.h"
+#include "ms5837.h"
 
 //pass one of the defined densities (i.e. DENSITY_FRESHWATER or DENSITY_SALTWATER)
-void setFluidDensity(struct ms5837_data *data, density){
+void setFluidDensity(struct ms5837_data *data, int density){
 	data->fluidDensity = density;
 }
 	
@@ -73,9 +63,9 @@ void calculate(struct ms5837_data *data) {
 	data->pressure = (float)(((data->d1*SENS)/2097152-OFF)/32768)/100.0;
 }
 
-//Read and set ADC resolution.
+//TODO fix d array
 void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
-  uint16_t d[3];
+  	uint16_t d[3];
 	//read temp
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_TEMPERATURE_ADC_CONVERSION + 2*oversampling);
 	sleep(0.000025*pow(2,8+oversampling));
@@ -87,10 +77,10 @@ void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
 	d = wiringPiI2CRead(MS5837_ADDR);
 	data->d2 = d[0] << 16 | d[1] << 8 | d[2];
 	calculate(data);
-	printf('Temperature: %0.2f C\n', temperature(data, UNITS_Celsius));
-	printf('Pressure: %0.2f psi\n', pressure(data, UNITS_psi));
-	printf('Depth: %0.2f', depth(data));
-	printf('Altitude: %0.2f', altitude(data));
+	printf("Temperature: %0.2f C\n", temperature(data, UNITS_Celsius));
+	printf("Pressure: %0.2f psi\n", pressure(data, UNITS_psi));
+	printf("Depth: %0.2f", depth(data));
+	printf("Altitude: %0.2f", altitude(data));
 }
 	
 // copied from TEConnectivity code
@@ -141,12 +131,12 @@ void ms5837_init(struct ms5837_data *data){
 	
 	//Check crc
 	uint8_t crc = (data->C[0] & 0xF000) >> 12;
-	if (crc_check(data, crc) == false)
+	if (!crc_check(data, crc))
 		printf("PROM read error, CRC failed.");
 }
 
 int main(void) {
-	uint32_t oversampling = ms5837_resolution_osr; //choose
+	uint32_t oversampling = OSR_8192; //choose
 	struct ms5837_data data;
  	ms5837_init(&data);
 	while(true){
