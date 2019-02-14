@@ -1,5 +1,6 @@
 //https://github.com/TEConnectivity/MS5837_Generic_C_Driver/blob/master/ms5837.c
 //https://github.com/bluerobotics/ms5837-python/blob/master/ms5837.py
+//https://github.com/bluerobotics/BlueRobotics_MS5837_Library/blob/master/MS5837.cpp
 
 #include <stdio.h>
 #include <unistd.h>
@@ -39,9 +40,8 @@ float altitude(struct ms5837_data *data){
 
 // via datasheet
 void calculate(struct ms5837_data *data) {
-	int32_t dT;
-  int64_t OFF, SENS;
-  uint64_t OFFi, SENSi, Ti;
+	int32_t dT, OFFi, SENSi, Ti;
+ 	int64_t OFF, SENS, OFF2, SENS2;
 
 	dT = data->d2 - data->C[5]*256;
 	SENS = data->C[1]*65536+(data->C[3]*dT)/128;
@@ -56,14 +56,13 @@ void calculate(struct ms5837_data *data) {
 			SENSi = (63*(data->temp-2000)*(data->temp-2000))/32;
 	}
 	
-	OFF -= OFFi;
-	SENS -= SENSi;
+	OFF2 = OFF-OFFi;
+	SENS2 = SENS-SENSi;
 		
 	data->temp = (float)(data->temp-Ti);
-	data->pressure = (float)(((data->d1*SENS)/2097152-OFF)/32768)/100.0;
+	data->pressure = (float)(((data->d1*SENS2)/2097152-OFF2)/32768)/100.0;
 }
 
-//TODO fix d array
 void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
   	uint16_t d[3];
 	//read temp
@@ -80,36 +79,32 @@ void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
 	printf("Depth: %0.2f", depth(data));
 	printf("Altitude: %0.2f", altitude(data));
 }
-	
-// copied from TEConnectivity code
-bool crc_check(struct ms5837_data *data, uint8_t crc){
-	uint8_t cnt, n_bit;
-	uint16_t n_rem, crc_read;
-	n_rem = 0x00;
-	crc_read = data->n_prom[0];
-	data->n_prom[MS5837_COEFFICIENT_NUMBERS] = 0;
-	data->n_prom[0] = (0x0FFF & (data->n_prom[0]));    // Clear the CRC byte
 
-	for(cnt = 0 ; cnt < (MS5837_COEFFICIENT_NUMBERS+1)*2 ; cnt++) {
+// copied from BlueRobotics
+uint8_t crc_check(uint16_t n_prom[]) {
+	uint16_t n_rem = 0;
 
-		// Get next byte
-		if (cnt%2 == 1)
-			n_rem ^=  data->n_prom[cnt>>1] & 0x00FF;
-		else
-			n_rem ^=  data->n_prom[cnt>>1]>>8;
+	n_prom[0] = ((n_prom[0]) & 0x0FFF);
+	n_prom[7] = 0;
 
-		for( n_bit = 8; n_bit > 0 ; n_bit-- ){
-
-			if( n_rem & 0x8000 )
+	for ( uint8_t i = 0 ; i < 16; i++ ) {
+		if ( i%2 == 1 ) {
+			n_rem ^= (uint16_t)((n_prom[i>>1]) & 0x00FF);
+		} else {
+			n_rem ^= (uint16_t)(n_prom[i>>1] >> 8);
+		}
+		for ( uint8_t n_bit = 8 ; n_bit > 0 ; n_bit-- ) {
+			if ( n_rem & 0x8000 ) {
 				n_rem = (n_rem << 1) ^ 0x3000;
-			else
-				n_rem <<= 1;
+			} else {
+				n_rem = (n_rem << 1);
+			}
 		}
 	}
-	n_rem >>= 12;
-	data->n_prom[0] = crc_read;
 	
-	return  ( n_rem == crc );	
+	n_rem = ((n_rem >> 12) & 0x000F);
+
+	return n_rem ^ 0x00;
 }
 
 /**
@@ -122,14 +117,15 @@ void ms5837_init(struct ms5837_data *data){
 	
 	// Read calibration values and CRC
 	for (int i=0;i<8;i++){
-		uint32_t c = wiringPiI2CRead8(MS5837_ADDR, MS5837_PROM_READ + 2*i);
+		uint32_t c = wiringPiI2CReadReg8(MS5837_ADDR, MS5837_PROM_READ + 2*i);
 		c = ((c & 0xFF) << 8) | (c >> 8);
 		data->C[i] = c;
 	}
 	
 	//Check crc
-	uint8_t crc = (data->C[0] & 0xF000) >> 12;
-	if (!crc_check(data, crc))
+	uint8_t crcRead = (data->C[0] & 0xF000) >> 12;
+	uint8_t crcCalc = crc_check(data->C);
+  if (crcCalc != crcRead)
 		printf("PROM read error, CRC failed.");
 }
 
