@@ -69,13 +69,11 @@ void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
 	//read temp
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_TEMPERATURE_ADC_CONVERSION + 2*oversampling);
 	sleep(0.000025*pow(2,8+oversampling));
-	d = wiringPiI2CRead(MS5837_ADDR);
-	data->d1 = d[0] << 16 | d[1] << 8 | d[2];
+	data->d1 = wiringPiI2CRead(MS5837_ADDR);
 	//read pressure
 	wiringPiI2CWrite(MS5837_ADDR, MS3857_START_PRESSURE_ADC_CONVERSION + 2*oversampling);
 	sleep(0.000025*pow(2,8+oversampling));
-	d = wiringPiI2CRead(MS5837_ADDR);
-	data->d2 = d[0] << 16 | d[1] << 8 | d[2];
+	data->d2 = wiringPiI2CRead(MS5837_ADDR);
 	calculate(data);
 	printf("Temperature: %0.2f C\n", temperature(data, UNITS_Celsius));
 	printf("Pressure: %0.2f psi\n", pressure(data, UNITS_psi));
