@@ -2,7 +2,7 @@
 // also look into https://github.com/ControlEverythingCommunity/LSM303DLHC/blob/master/C/LSM303DLHC.c
 
 #include <stdio.h>
-#include <wiringPiI2C.h>
+#include "./WiringPi/wiringPi/wiringPi.h"
 #include "lsm303.h"
 
 void setup(){
