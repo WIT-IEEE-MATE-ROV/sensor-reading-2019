@@ -18,10 +18,10 @@
 #define LSM303_REGISTER_MAG_MR_REG_M      0x02
 #define LSM303_REGISTER_MAG_OUT_X_H_M     0x03
 #define LSM303_REGISTER_MAG_OUT_X_L_M     0x04
-#define LSM303_REGISTER_MAG_OUT_Z_H_M     0x05
-#define LSM303_REGISTER_MAG_OUT_Z_L_M     0x06
-#define LSM303_REGISTER_MAG_OUT_Y_H_M     0x07
-#define LSM303_REGISTER_MAG_OUT_Y_L_M     0x08
+#define LSM303_REGISTER_MAG_OUT_Y_H_M     0x05
+#define LSM303_REGISTER_MAG_OUT_Y_L_M     0x06
+#define LSM303_REGISTER_MAG_OUT_Z_H_M     0x07
+#define LSM303_REGISTER_MAG_OUT_Z_L_M     0x08
 
 // Gain settings for set_mag_gain()
 #define LSM303_MAGGAIN_1_3 0x20 // +/- 1.3
