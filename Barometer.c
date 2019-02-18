@@ -4,29 +4,32 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "./WiringPi/wiringPi/wiringPiI2C.h"
+#include <time.h>
+//#include "./WiringPi/wiringPi/wiringPiI2C.h"
 #include "ms5837.h"
+
+
 
 //pass one of the defined densities (i.e. DENSITY_FRESHWATER or DENSITY_SALTWATER)
 void setFluidDensity(struct ms5837_data *data, int density){
 	data->fluidDensity = density;
 }
-	
+
 //Pressure in requested units
 float pressure(struct ms5837_data *data, float conversion){
-	return data->pressure * conversion;	
+	return data->pressure * conversion;
 }
-	
+
 //convert temp to requested units, default is Celsius
 float temperature(struct ms5837_data *data, int conversion){
   float degC = (data->temp/100.0);
   if (conversion == UNITS_Farenheit)
     return ((9/5) * degC +32);
-  else if (conversion == UNITS_Kelvin) 
+  else if (conversion == UNITS_Kelvin)
     return (degC - 372);
   return degC;
 }
-	
+
 // Depth relative to MSL pressure in given fluid density
 float depth(struct ms5837_data *data){
   setFluidDensity(data, DENSITY_FRESHWATER);
@@ -48,17 +51,17 @@ void calculate(struct ms5837_data *data) {
 	OFF = data->C[2]*131072+(data->C[4]*dT)/64;
 	data->pressure = (data->d1*SENS/(2097152)-OFF)/(32768);
 	data->temp = 2000+dT*data->C[6]/8388608;
-		
+
 	// Second order compensation
 	if ((data->temp/100) < 20) { // Low temp
 			Ti = (11*dT*dT)/(34359738368);
-			OFFi = (31*(data->temp-2000)*(data->temp-2000))/8;
+			OFFi = (31*(data->temp-2000)*(data->temp-2000))/8; //why are these diff from the blue robotics?
 			SENSi = (63*(data->temp-2000)*(data->temp-2000))/32;
 	}
-	
+
 	OFF2 = OFF-OFFi;
 	SENS2 = SENS-SENSi;
-		
+
 	data->temp = (float)(data->temp-Ti);
 	data->pressure = (float)(((data->d1*SENS2)/2097152-OFF2)/32768)/100.0;
 }
@@ -82,18 +85,19 @@ void ms5837_read(struct ms5837_data *data, uint32_t oversampling){
 
 // copied from BlueRobotics
 uint8_t crc_check(uint16_t n_prom[]) {
-	uint16_t n_rem = 0;
+	uint16_t n_rem = 0x00;
+	uint8_t i, n_bit;
 
 	n_prom[0] = ((n_prom[0]) & 0x0FFF);
 	n_prom[7] = 0;
 
-	for ( uint8_t i = 0 ; i < 16; i++ ) {
+	for ( i = 0 ; i < 16; i++ ) {
 		if ( i%2 == 1 ) {
 			n_rem ^= (uint16_t)((n_prom[i>>1]) & 0x00FF);
 		} else {
 			n_rem ^= (uint16_t)(n_prom[i>>1] >> 8);
 		}
-		for ( uint8_t n_bit = 8 ; n_bit > 0 ; n_bit-- ) {
+		for ( n_bit = 8; n_bit > 0; n_bit-- ) {
 			if ( n_rem & 0x8000 ) {
 				n_rem = (n_rem << 1) ^ 0x3000;
 			} else {
@@ -101,7 +105,7 @@ uint8_t crc_check(uint16_t n_prom[]) {
 			}
 		}
 	}
-	
+
 	n_rem = ((n_rem >> 12) & 0x000F);
 
 	return n_rem ^ 0x00;
@@ -111,17 +115,24 @@ uint8_t crc_check(uint16_t n_prom[]) {
 Configures the SERCOM I2C master to be used with the MS5837 device.
  */
 void ms5837_init(struct ms5837_data *data){
-    /* Initialize and enable device with config. */
+    /* Initialize and enable/reset device with config. */
 	wiringPiI2CSetup(MS5837_ADDR);
 	wiringPiI2CWrite(MS5837_ADDR, MS5837_RESET);
-	
+
+	//allow reset to happen
+	delay(5);
+
 	// Read calibration values and CRC
-	for (int i=0;i<8;i++){
+	//loop causes issues.. won't compile
+	for (uint8_t i = 0; i < 8; i++){
+        wiringPiI2CSetup(MS5837_ADDR);
+        wiringPiI2CWrite(MS5837_ADDR, MS5837_PROM_READ + 2*i);
+
 		uint32_t c = wiringPiI2CReadReg8(MS5837_ADDR, MS5837_PROM_READ + 2*i);
 		c = ((c & 0xFF) << 8) | (c >> 8);
 		data->C[i] = c;
 	}
-	
+
 	//Check crc
 	uint8_t crcRead = (data->C[0] & 0xF000) >> 12;
 	uint8_t crcCalc = crc_check(data->C);

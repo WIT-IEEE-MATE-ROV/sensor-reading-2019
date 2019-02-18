@@ -39,14 +39,14 @@ temp sensor driver header file
 #define OSR_8192 5
 
 //I2C addresses/registers
-#define MS5837_ADDR           				0x76
-#define MS5837_RESET           				0x1E
-#define MS5837_ADC_READ        				0x00
-#define MS5837_PROM_READ      			 	0xA0
-#define MS3857_START_PRESSURE_ADC_CONVERSION  		0x40
-#define MS3857_START_TEMPERATURE_ADC_CONVERSION 	0x50
+#define MS5837_ADDR           				        0x76
+#define MS5837_RESET           				        0x1E
+#define MS5837_ADC_READ        				        0x00
+#define MS5837_PROM_READ      			 	        0xA0
+#define MS3857_START_PRESSURE_ADC_CONVERSION  		0x40 //0x4A on bluerobotics??
+#define MS3857_START_TEMPERATURE_ADC_CONVERSION 	0x50 //0x5A on bluerobotics??
 
-#define MS5837_CONVERSION_OSR_MASK				0x0F
+#define MS5837_CONVERSION_OSR_MASK				    0x0F
 
 #define MS5837_CONVERSION_TIME_OSR_256				1000
 #define MS5837_CONVERSION_TIME_OSR_512				2000
@@ -54,7 +54,7 @@ temp sensor driver header file
 #define MS5837_CONVERSION_TIME_OSR_2048				5000
 #define MS5837_CONVERSION_TIME_OSR_4096				9000
 #define MS5837_CONVERSION_TIME_OSR_8192				17000
-	
+
 // MS5837 commands
 #define MS5837_PROM_ADDRESS_READ_ADDRESS_0			0xA0
 #define MS5837_PROM_ADDRESS_READ_ADDRESS_1			0xA2
@@ -66,14 +66,14 @@ temp sensor driver header file
 #define MS5837_PROM_ADDRESS_READ_ADDRESS_7			0xAE
 
 // Coefficients indexes for temperature and pressure computation
-#define MS5837_CRC_INDEX							0
-#define MS5837_PRESSURE_SENSITIVITY_INDEX					1 
+#define MS5837_CRC_INDEX							        0
+#define MS5837_PRESSURE_SENSITIVITY_INDEX					1
 #define MS5837_PRESSURE_OFFSET_INDEX						2
-#define MS5837_TEMP_COEFF_OF_PRESSURE_SENSITIVITY_INDEX				3
-#define MS5837_TEMP_COEFF_OF_PRESSURE_OFFSET_INDEX				4
+#define MS5837_TEMP_COEFF_OF_PRESSURE_SENSITIVITY_INDEX		3
+#define MS5837_TEMP_COEFF_OF_PRESSURE_OFFSET_INDEX			4
 #define MS5837_REFERENCE_TEMPERATURE_INDEX					5
-#define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX					6
-#define MS5837_COEFFICIENT_NUMBERS						7
+#define MS5837_TEMP_COEFF_OF_TEMPERATURE_INDEX				6
+#define MS5837_COEFFICIENT_NUMBERS				    		7
 
 struct ms5837_data {
 	float fluidDensity;
@@ -84,4 +84,4 @@ struct ms5837_data {
 };
 
 #endif /* MS5837_H_INCLUDED */
-  
+
