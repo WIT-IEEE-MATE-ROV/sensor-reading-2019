@@ -3,12 +3,13 @@
 //https://github.com/bluerobotics/BlueRobotics_MS5837_Library/blob/master/MS5837.cpp
 
 #include <stdio.h>
+#ifdef _WIN32
+#include <Windows.h>
+#else
 #include <unistd.h>
-#include <time.h>
+#endif
 //#include "./WiringPi/wiringPi/wiringPiI2C.h"
 #include "ms5837.h"
-
-
 
 //pass one of the defined densities (i.e. DENSITY_FRESHWATER or DENSITY_SALTWATER)
 void setFluidDensity(struct ms5837_data *data, int density){
@@ -120,7 +121,7 @@ void ms5837_init(struct ms5837_data *data){
 	wiringPiI2CWrite(MS5837_ADDR, MS5837_RESET);
 
 	//allow reset to happen
-	delay(5);
+	sleep(5);
 
 	// Read calibration values and CRC
 	//loop causes issues.. won't compile
