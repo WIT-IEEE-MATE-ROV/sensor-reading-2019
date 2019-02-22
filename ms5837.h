@@ -43,8 +43,8 @@ temp sensor driver header file
 #define MS5837_RESET           				        0x1E
 #define MS5837_ADC_READ        				        0x00
 #define MS5837_PROM_READ      			 	        0xA0
-#define MS3857_START_PRESSURE_ADC_CONVERSION  		0x40 //0x4A on bluerobotics??
-#define MS3857_START_TEMPERATURE_ADC_CONVERSION 	0x50 //0x5A on bluerobotics??
+#define MS3857_START_PRESSURE_ADC_CONVERSION  		0x4A //depends on what ORS is chosen (this is for ORS=8192)
+#define MS3857_START_TEMPERATURE_ADC_CONVERSION 	0x5A //depends on what ORS is chosen (this is for ORS=8192)
 
 #define MS5837_CONVERSION_OSR_MASK				    0x0F
 
